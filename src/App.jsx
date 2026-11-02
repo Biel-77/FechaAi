@@ -44,31 +44,37 @@ const ACTIVITY=[
 ];
 function Workspace({scrollTarget}){
   const phoneRef=useRef(null);
-  const [step,setStep]=useState(reduce?3:0);
+  const [step,setStep]=useState(0);
   useEffect(()=>{
-    if(reduce)return;
     const hero=scrollTarget.current;
     const phone=phoneRef.current;
     if(!hero||!phone)return;
-    const supportsScrollTimeline=CSS.supports('animation-timeline: view()');
+    const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const tiltScale=reduceMotion ? 0.55 : 1;
+    let heroTop=hero.getBoundingClientRect().top+window.scrollY;
+    let heroHeight=hero.offsetHeight;
     let frame=0;
     let currentStep=-1;
     const update=()=>{
       frame=0;
-      const progress=Math.min(1,Math.max(0,-hero.getBoundingClientRect().top/hero.offsetHeight));
-      if(!supportsScrollTimeline){
-        phone.style.transform=`rotateY(${-12+progress*24}deg) rotateX(${7-progress*14}deg) translateY(${-progress*20}px)`;
-      }
+      const scrollRange=Math.max(heroHeight-window.innerHeight*.55,window.innerHeight*.42);
+      const progress=Math.min(1,Math.max(0,(window.scrollY-heroTop)/scrollRange));
+      phone.style.transform=`rotateY(${-9+progress*16*tiltScale}deg) rotateX(${4-progress*7*tiltScale}deg) translateY(${-progress*12*tiltScale}px) scale(${0.96+progress*0.08*tiltScale})`;
       const nextStep=Math.min(3,Math.floor(progress*4));
       if(nextStep!==currentStep){currentStep=nextStep;setStep(nextStep)}
     };
     const requestUpdate=()=>{if(!frame)frame=requestAnimationFrame(update)};
+    const handleResize=()=>{
+      heroTop=hero.getBoundingClientRect().top+window.scrollY;
+      heroHeight=hero.offsetHeight;
+      requestUpdate();
+    };
     update();
     window.addEventListener('scroll',requestUpdate,{passive:true});
-    window.addEventListener('resize',requestUpdate);
+    window.addEventListener('resize',handleResize);
     return()=>{
       window.removeEventListener('scroll',requestUpdate);
-      window.removeEventListener('resize',requestUpdate);
+      window.removeEventListener('resize',handleResize);
       if(frame)cancelAnimationFrame(frame);
     };
   },[scrollTarget]);
