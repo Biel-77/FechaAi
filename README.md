@@ -46,7 +46,7 @@ O projeto reúne uma página de apresentação em português com foco em tornar 
 ```bash
 git clone <URL_DO_REPOSITORIO>
 cd FechaAi
-npm install
+npm ci
 npm run dev
 ```
 
@@ -81,6 +81,7 @@ FechaAi/
 │   └── styles.css       # Estilos e animações
 ├── index.html           # Documento HTML de entrada
 ├── package.json         # Dependências e scripts npm
+├── package-lock.json    # Versões instaladas das dependências
 └── vite.config.js       # Configuração do Vite
 ```
 
